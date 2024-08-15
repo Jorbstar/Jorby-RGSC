@@ -5,7 +5,6 @@ using namespace rage;
 
 void* g_GetProcAddress{};
 rlPc* g_rlPc{};
-const char* g_rockstargamesdotcom{};
 
 void create_console()
 {
@@ -37,9 +36,16 @@ void read_config()
 
 void scan_pointers()
 {
-	g_rlPc = scan_bmh(get_bytes_from_ptr("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 92")).add(3).rip().as<decltype(g_rlPc)>();
-	g_rockstargamesdotcom = scan_bmh(get_bytes_from_str("rocktargames.com")).as<decltype(g_rockstargamesdotcom)>();
-	std::cout << "Domain: " << g_rockstargamesdotcom << std::endl;
+	g_rlPc = scan_bmh(get_bytes_from_ida_mem_signature("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 92")).add(3).rip().as<decltype(g_rlPc)>();
+	for (auto& m : scan_bruteforce_all(get_bytes_from_str("rockstargames.com")))
+	{
+		size_t len{ strlen(m.as<const char*>()) + 1 };
+		std::string str{};
+		str.resize(len);
+		strncpy(str.data(), m.as<const char*>(), len);
+		std::string patched_str{ "jorby.io" + str.substr(17) };
+		strncpy(m.as<char*>(), patched_str.data(), len);
+	}
 }
 
 FARPROC GetProcAddressHk(HMODULE hModule, LPCSTR lpProcName)
@@ -88,10 +94,10 @@ FARPROC GetProcAddressHk(HMODULE hModule, LPCSTR lpProcName)
 
 void do_fancy_shutdown(u8 time)
 {
-	std::cout << "Unloading in " << time << " seconds..." << std::endl;
+	std::cout << "Unloading in " << std::to_string(time) << " seconds..." << std::endl;
 	for (u8 i{ time }; i; --i)
 	{
-		std::cout << "Unloading in " << i << " seconds..." << std::endl;
+		std::cout << "Unloading in " << std::to_string(i) << " seconds..." << std::endl;
 		std::this_thread::sleep_for(1s);
 	}
 }

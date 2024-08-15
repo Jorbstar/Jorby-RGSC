@@ -83,18 +83,13 @@ inline std::vector<byte_t> get_bytes_from_str(const std::string& str)
 
 	for (size_t i{}; i != str.size() - 1; ++i)
 	{
-		[[likely]] if (str[i] == ' ')
-		{
-			continue;
-		}
-
 		bytes.emplace_back(static_cast<uint8_t>(str[i]));
 	}
 
 	return bytes;
 }
 
-inline std::vector<byte_t> get_bytes_from_ptr(const std::string& ptr)
+inline std::vector<byte_t> get_bytes_from_ida_mem_signature(const std::string& ptr)
 {
 	std::vector<byte_t> bytes{};
 
@@ -170,4 +165,40 @@ inline mem scan_bmh(std::vector<byte_t> bytes, hmodule hmodule = {})
 	}
 
 	return {};
+}
+
+inline bool does_memory_match(u8* target, std::optional<u8> const* sig, u64 len)
+{
+	for (u64 i{ len }; i; --i)
+		if (sig[i] && *sig[i] != target[i])
+			return false;
+
+	return true;
+}
+
+inline mem scan_bruteforce(std::vector<byte_t> bytes, hmodule hmodule = {})
+{
+	for (u64 i{}; i != hmodule.size() - bytes.size(); ++i)
+	{
+		if (does_memory_match(hmodule.begin().add(i).as<u8*>(), bytes.data(), bytes.size()))
+		{
+			return hmodule.begin().add(i);
+		}
+	}
+
+	return {};
+}
+
+inline std::vector<mem> scan_bruteforce_all(std::vector<byte_t> bytes, hmodule hmodule = {})
+{
+	std::vector<mem> results{};
+	for (u64 i{}; i != hmodule.size() - bytes.size(); ++i)
+	{
+		if (does_memory_match(hmodule.begin().add(i).as<u8*>(), bytes.data(), bytes.size()))
+		{
+			results.push_back(hmodule.begin().add(i));
+		}
+	}
+
+	return results;
 }
