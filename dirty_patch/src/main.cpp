@@ -38,7 +38,7 @@ void read_config()
 void scan_pointers()
 {
 	g_rlPc = scan_bmh(get_bytes_from_ptr("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 92")).add(3).rip().as<decltype(g_rlPc)>();
-	g_rockstargamesdotcom = scan_bmh(get_bytes_from_str("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 92")).as<decltype(g_rockstargamesdotcom)>();
+	g_rockstargamesdotcom = scan_bmh(get_bytes_from_str("rocktargames.com")).as<decltype(g_rockstargamesdotcom)>();
 	std::cout << "Domain: " << g_rockstargamesdotcom << std::endl;
 }
 
