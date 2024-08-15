@@ -5,6 +5,7 @@ using namespace rage;
 
 void* g_GetProcAddress{};
 rlPc* g_rlPc{};
+const char* g_rockstargamesdotcom{};
 
 void create_console()
 {
@@ -23,11 +24,11 @@ void destroy_console()
 
 void read_config()
 {
-	std::ifstream file{ "socialclub_config.txt" };
+	std::ifstream file{ "config.txt" };
 	g_dll_path = { (std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>() };
 	if (g_dll_path.empty())
 	{
-		std::cout << "No socialclub_config.txt!" << std::endl;
+		std::cout << "No config.txt!" << std::endl;
 		g_no_fancy_shutdown = true;
 		g_running = false;
 	}
@@ -36,7 +37,9 @@ void read_config()
 
 void scan_pointers()
 {
-	g_rlPc = scan("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 92").add(3).rip().as<decltype(g_rlPc)>();
+	g_rlPc = scan_bmh(get_bytes_from_ptr("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 92")).add(3).rip().as<decltype(g_rlPc)>();
+	g_rockstargamesdotcom = scan_bmh(get_bytes_from_str("48 8D 0D ? ? ? ? E8 ? ? ? ? 48 85 C0 74 ? 48 8D 0D ? ? ? ? E8 ? ? ? ? 48 8B C8 48 8B 10 FF 92")).as<decltype(g_rockstargamesdotcom)>();
+	std::cout << "Domain: " << g_rockstargamesdotcom << std::endl;
 }
 
 FARPROC GetProcAddressHk(HMODULE hModule, LPCSTR lpProcName)

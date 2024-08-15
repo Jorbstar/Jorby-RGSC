@@ -77,6 +77,23 @@ inline byte_t char_to_hex(const char c)
 	return {};
 }
 
+inline std::vector<byte_t> get_bytes_from_str(const std::string& str)
+{
+	std::vector<byte_t> bytes{};
+
+	for (size_t i{}; i != str.size() - 1; ++i)
+	{
+		[[likely]] if (str[i] == ' ')
+		{
+			continue;
+		}
+
+		bytes.emplace_back(static_cast<uint8_t>(str[i]));
+	}
+
+	return bytes;
+}
+
 inline std::vector<byte_t> get_bytes_from_ptr(const std::string& ptr)
 {
 	std::vector<byte_t> bytes{};
@@ -106,9 +123,9 @@ inline std::vector<byte_t> get_bytes_from_ptr(const std::string& ptr)
 
 	return bytes;
 }
-inline mem scan(const char* ptr, hmodule hmodule = {})
+
+inline mem scan_bmh(std::vector<byte_t> bytes, hmodule hmodule = {})
 {
-	std::vector<byte_t> bytes{ get_bytes_from_ptr(ptr) };
 	int64_t max_shift{ static_cast<int64_t>(bytes.size()) };
 	int64_t max_idx{ max_shift - 1 };
 
